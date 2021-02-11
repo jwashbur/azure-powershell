@@ -1,0 +1,23 @@
+# author: Josh Washburn
+# date created: 2-10-2021 
+# version: 1.0
+# purpose: move an Azure disk to a different subscription
+###########################################################
+
+# select the source Azure subscription where the disk currently exists
+Set-AzContext - SubscriptionName '<enter subscription name>'
+
+# enter the details of the target subscription where you want to move the disk to
+$destinationRG = '<enter destination resource group>'
+$destionationSub = '<enter desination subscription ID>'
+
+# enter the disk details
+$diskName = '<enter the disk name>'
+$rgName = '<enter the source resource group name>'
+
+# store the disk in a variable
+$disk = Get-AzDisk -DiskName $diskName -ResourceGroupName $rgName
+
+# use the command below to execute the move operation
+# feel free to use -WhatIf in place of -Force if you want to test the command before actually performing the move operation
+Move-AzResource -DestinationResourceGroupName $destinationRG -DestinationSubscriptionId $destinationSub -ResourceId $disk.Id -Force
