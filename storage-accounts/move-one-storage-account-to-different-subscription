@@ -1,0 +1,23 @@
+# author: Josh Washburn
+# date created: 2-10-2021 
+# version: 1.0
+# purpose: move one storage account to a different subscription
+#################################################################
+
+# select the source Azure subscription where the storage account currently exists
+Set-AzContext - SubscriptionName '<enter subscription name>'
+
+# enter the details of the target subscription where you want to move the storage account to
+$destinationRG = '<enter destination resource group>'
+$destinationSub = '<enter desination subscription ID>'
+
+# enter the details for the storage account
+$saName = '<enter storage account name>'
+$sourceRG = '<enter source resource group name>'
+
+# store the storage account in a variable
+$storage = get-azstorageaccount -Name $saName -ResourceGroupName $sourceRG
+
+# use the command below to execute the move operation
+# feel free to use -WhatIf in place of -Force if you want to test the command before actually performing the move operation
+Move-AzResource -DestinationResourceGroupName $destinationRG -DestinationSubscriptionId $destinationSub -ResourceId $storage.Id -Force
