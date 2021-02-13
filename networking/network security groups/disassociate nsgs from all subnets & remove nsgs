@@ -5,18 +5,23 @@
 ##################################################################################################
 
 # get all virtual networks
-$vnet = get-azvirtualnetwork
+$vnets = get-azvirtualnetwork
 
 # get all subnets
-$subnets = foreach ($vn in $vnet) {Get-AzVirtualNetworkSubnetConfig -VirtualNetwork $vn}
+$subnets = foreach ($vnet in $vnets) {Get-AzVirtualNetworkSubnetConfig -VirtualNetwork $vnet}
 
 # disassociate nsgs from all subnets
 foreach ($subnet in $subnets) {$subnet.NetworkSecurityGroup = $null}
 
 # set the change from the previous loop
 # this updates the subnets/vnets to indicate there are no nsgs associated to the subnets anymore
-foreach ($vn in $vnet) {Set-AzVirtualNetwork -VirtualNetwork $vn}
+foreach ($vnet in $vnets) {Set-AzVirtualNetwork -VirtualNetwork $vnet}
 
-# get nsgs 
-$nsgs = Get-AzNetworkSecurityGroup | Where-Object {$_.Subnets.Id -eq $null -and $_.NetworkInterfaces.Id -ne $null}
-foreach ($nsg in $nsgs) {Remove-AzNetworkSecurityGroup -Name $nsg.Name -ResourceGroupName $nsg.ResourceGroupName -Force}
+# get nsgs that are not associated with a subnet
+# exclude nsgs that are associated with a NIC
+$nsgs = Get-AzNetworkSecurityGroup | Where-Object {$_.Subnets.Id -eq $null -and $_.NetworkInterfaces.Id -eq $null}
+
+# remove all nsgs stored in the $nsgs variable
+foreach ($nsg in $nsgs) {
+  Remove-AzNetworkSecurityGroup -Name $nsg.Name -ResourceGroupName $nsg.ResourceGroupName -Force
+  }
