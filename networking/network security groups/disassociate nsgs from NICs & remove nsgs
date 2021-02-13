@@ -18,7 +18,7 @@ foreach ($nic in $nics) {
 
 # get nsgs that are not associated with a NIC
 # exclude nsgs that are associated with a subnet
-$nsgs = Get-AzNetworkSecurityGroup | Where-Object {$_.NetworkInterfaces.Id -eq $null -and $_.Subnets.Id -ne $null}
+$nsgs = Get-AzNetworkSecurityGroup | Where-Object {$_.NetworkInterfaces.Id -eq $null -and $_.Subnets.Id -eq $null}
 
 # remove all nsgs stored in the $nsgs variable
 foreach ($nsg in $nsgs) {
