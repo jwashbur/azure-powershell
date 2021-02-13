@@ -4,6 +4,12 @@
 # purpose: disassociate nsgs from subnets and remove nsgs which are not associated to a resource
 ##################################################################################################
 
+# set variable
+$subName = '<enter subscription name>'
+
+# select the Azure subscription
+Set-AzContext - SubscriptionName $subName
+
 # get all virtual networks
 $vnets = get-azvirtualnetwork
 
