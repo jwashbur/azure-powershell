@@ -1,0 +1,22 @@
+# author: Josh Washburn
+# date created: 2-13-2021 
+# version: 1.0
+# purpose: disassociate an nsg from a NIC
+###########################################
+
+# set variables
+$subName = '<enter subscription name>'
+$rgName = '<enter resource group name>'
+$nicName = '<enter NIC name>'
+
+# select the Azure subscription
+Set-AzContext - SubscriptionName $subName
+
+# get the NIC
+$nic = Get-AzNetworkInterface -ResourceGroupName $rgName -Name $nicName
+
+# set the nsg value to null on the NIC 
+$nic.NetworkSecurityGroup = $null
+
+# disassociate the nsg from the NIC
+Set-AzNetworkInterface -NetworkInterface $nic
