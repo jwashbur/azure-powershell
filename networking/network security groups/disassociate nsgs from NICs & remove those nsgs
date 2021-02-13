@@ -1,8 +1,8 @@
 # author: Josh Washburn
 # date created: 2-12-2021 
 # version: 1.0
-# purpose: disassociate all network security groups from all NICs & remove all NSGs from a subscription
-#########################################################################################################
+# purpose: disassociate network security groups from all NICs & remove those NSGs
+###################################################################################
 
 # select the Azure subscription that contains the NSGs you want to remove
 Set-AzContext - SubscriptionName '<enter subscription name>'
@@ -16,10 +16,11 @@ foreach ($nic in $nics) {
     Set-AzNetworkInterface -NetworkInterface $nic
 }
 
-# get all NSGs
-$nsgs = Get-AzNetworkSecurityGroup
+# get nsgs that are not associate with a NIC
+# this command would exclude any nsgs that are associated with a subnet
+$nsgs = Get-AzNetworkSecurityGroup | Where-Object {$_.NetworkInterfaces.Id -eq $null}
 
-# remove all NSGs
+# remove all nsgs stored in the $nsgs variable
 foreach ($nsg in $nsgs) {
     Remove-AzNetworkSecurityGroup -Name $nsg.Name -ResourceGroupName $nsg.ResourceGroupName -Force
 }
