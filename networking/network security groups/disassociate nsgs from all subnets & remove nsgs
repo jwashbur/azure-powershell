@@ -1,0 +1,22 @@
+# author: Josh Washburn
+# date created: 2-12-2021 
+# version: 1.0
+# purpose: disassociate nsgs from subnets and remove nsgs which are not associated to a resource
+##################################################################################################
+
+# get all virtual networks
+$vnet = get-azvirtualnetwork
+
+# get all subnets
+$subnets = foreach ($vn in $vnet) {Get-AzVirtualNetworkSubnetConfig -VirtualNetwork $vn}
+
+# disassociate nsgs from all subnets
+foreach ($subnet in $subnets) {$subnet.NetworkSecurityGroup = $null}
+
+# set the change from the previous loop
+# this updates the subnets/vnets to indicate there are no nsgs associated to the subnets anymore
+foreach ($vn in $vnet) {Set-AzVirtualNetwork -VirtualNetwork $vn}
+
+# get nsgs 
+$nsgs = Get-AzNetworkSecurityGroup | Where-Object {$_.Subnets.Id -eq $null -and $_.NetworkInterfaces.Id -ne $null}
+foreach ($nsg in $nsgs) {Remove-AzNetworkSecurityGroup -Name $nsg.Name -ResourceGroupName $nsg.ResourceGroupName -Force}
