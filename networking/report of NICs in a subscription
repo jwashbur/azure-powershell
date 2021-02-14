@@ -29,8 +29,7 @@ $nics = get-aznetworkinterface
 # additional NIC properties can be added to this report
 # simply run $nic | Get-Member to view the available properties
 # then add the property to the 1st $info line & create a line to target the property
-foreach($nic in $nics)
-{
+foreach ($nic in $nics) {
     $info = "" | Select NicName, IpAddress, AllocationMethod, EnableIpForwarding, VirtualMachine
     $info.NicName = $nic.Name
     $info.IpAddress = $nic.IpConfigurations.PrivateIpAddress
@@ -55,3 +54,6 @@ $report | ft
 
 # export the report to a csv file
 $report | Export-Csv $path
+
+# this line will launch the report
+ii $path
