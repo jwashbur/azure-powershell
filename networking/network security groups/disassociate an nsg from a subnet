@@ -1,0 +1,43 @@
+# author: Josh Washburn
+# date created: 2-12-2021 
+# version: 1.0
+# purpose: disassociate an nsg from a subnet
+##############################################
+
+
+########################
+UNDER CONSTRUCTION
+########################
+
+# set variables
+$subName = '<enter subscription name>'
+$vnetName = '<enter vnet name>'
+$vnetRGName = '<enter resource group name of vnet>'
+
+# select the Azure subscription
+Set-AzContext - SubscriptionName $subName
+
+# get the virtual network
+$vnet = get-azvirtualnetwork -ResourceGroupName $vnetRGName -Name $vnetName
+
+# get the subnet
+$subnet = Get-AzVirtualNetworkSubnetConfig -VirtualNetwork $vnet | Where-Object {
+
+
+
+
+# disassociate nsgs from all subnets
+foreach ($subnet in $subnets) {$subnet.NetworkSecurityGroup = $null}
+
+# set the change from the previous loop
+# this updates the subnets/vnets to indicate there are no nsgs associated to the subnets anymore
+foreach ($vnet in $vnets) {Set-AzVirtualNetwork -VirtualNetwork $vnet}
+
+# get nsgs that are not associated with a subnet
+# exclude nsgs that are associated with a NIC
+$nsgs = Get-AzNetworkSecurityGroup | Where-Object {$_.Subnets.Id -eq $null -and $_.NetworkInterfaces.Id -eq $null}
+
+# remove all nsgs stored in the $nsgs variable
+foreach ($nsg in $nsgs) {
+  Remove-AzNetworkSecurityGroup -Name $nsg.Name -ResourceGroupName $nsg.ResourceGroupName -Force
+  }
