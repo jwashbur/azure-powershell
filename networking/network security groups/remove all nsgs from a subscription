@@ -1,0 +1,44 @@
+# author: Josh Washburn
+# date created: 2-13-2021 
+# version: 1.0
+# purpose: disassociate all nsgs from nics & subnets and remove all nsgs from a subscription
+##############################################################################################
+
+##############################################################################################
+# if an organization chooses to use a 3rd party network virtual appliance for firewall 
+# protection it may be helpful to remove all nsgs from a subscription 
+##############################################################################################
+
+$subName = '<enter the subscription name>'
+
+# select the Azure subscription that contains the nsgs you want to remove
+Set-AzContext - SubscriptionName $subName
+
+# get all NICs
+$nics = Get-AzNetworkInterface
+
+# disassociate the nsgs from all NICs
+foreach ($nic in $nics) {
+    $nic.NetworkSecurityGroup = $null
+    Set-AzNetworkInterface -NetworkInterface $nic
+}
+
+# get all virtual networks
+$vnets = get-azvirtualnetwork
+
+# get all subnets
+$subnets = foreach ($vnet in $vnets) {Get-AzVirtualNetworkSubnetConfig -VirtualNetwork $vnet}
+
+# set the nsg value of the subnets to $null
+foreach ($subnet in $subnets) {$subnet.NetworkSecurityGroup = $null}
+
+# disassociate nsgs from all subnets
+foreach ($vnet in $vnets) {Set-AzVirtualNetwork -VirtualNetwork $vnet}
+
+# get all nsgs
+$nsgs = Get-AzNetworkSecurityGroup
+
+# remove all nsgs
+foreach ($nsg in $nsgs) {
+    Remove-AzNetworkSecurityGroup -Name $nsg.Name -ResourceGroupName $nsg.ResourceGroupName -Force
+}
