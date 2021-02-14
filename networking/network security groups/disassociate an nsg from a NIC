@@ -8,6 +8,8 @@
 $subName = '<enter subscription name>'
 $rgName = '<enter resource group name>'
 $nicName = '<enter NIC name>'
+$nsgName = '<enter the nsg's name>'
+$nsgRGName = '<enter the name of the nsg's resource group>'
 
 # select the Azure subscription
 Set-AzContext - SubscriptionName $subName
@@ -20,3 +22,6 @@ $nic.NetworkSecurityGroup = $null
 
 # disassociate the nsg from the NIC
 Set-AzNetworkInterface -NetworkInterface $nic
+
+# use the line below if you want to remove (delete) the nsg
+Remove-AzNetworkSecurityGroup -Name $nsgName -ResourceGroupName $nsgRGName -Force
