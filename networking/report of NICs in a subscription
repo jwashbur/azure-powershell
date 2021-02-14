@@ -1,0 +1,57 @@
+# author: Josh Washburn
+# date created: 2-13-2021 
+# version: 1.0
+# purpose: create a report of all NICs in a subscription
+##########################################################
+
+# set variable
+$subName = '<enter subscription name>'
+
+# select the Azure subscription
+Set-AzContext - SubscriptionName $subName
+
+# get the date 
+$date = Get-Date -Format "MM_dd_yyyy_HH_mm"
+
+# create a folder called powershell
+New-Item -Path "c:\" -Name "powershell" -ItemType "directory"
+
+# set the path where the report will be created
+$path = "c:\powershell\"+"nic_report_"+$date+".csv"
+
+# create and empty array
+$report = @()
+
+# get all NICs
+$nics = get-aznetworkinterface
+ 
+# build the report by selecting specific NIC properties
+# additional NIC properties can be added to this report
+# simply run $nic | Get-Member to view the available properties
+# then add the property to the 1st $info line & create a line to target the property
+foreach($nic in $nics)
+{
+    $info = "" | Select NicName, IpAddress, AllocationMethod, EnableIpForwarding, VirtualMachine
+    $info.NicName = $nic.Name
+    $info.IpAddress = $nic.IpConfigurations.PrivateIpAddress
+    $info.AllocationMethod = $nic.IpConfigurations.PrivateIpAllocationMethod
+    $info.EnableIpForwarding = $nic.EnableIPForwarding
+    
+    # the expression below parses the resource ID so the result is only the virtual machine name
+    # this avoids having to see the full path of the resource ID in the results
+    # failures can be ignored since some NICs may not be attached to a virtual machine
+    # if that is the case the expression will have a $null value
+    $info.VirtualMachine = $nic.VirtualMachine.Id.tostring().substring($nic.VirtualMachine.Id.tostring().lastindexof('/')+1)
+    
+    # create a new array with all the data from the $info variable
+    # with each pass of the for loop the line below essentially 
+    # appends the data from $info to the $report array 
+    $report+=$info
+}
+
+# display the results in PowerShell
+# comment out the line below if you simply want to export to csv
+$report | ft
+
+# export the report to a csv file
+$report | Export-Csv $path
